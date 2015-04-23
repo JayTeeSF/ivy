@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"github.com/jameycribbs/ivy"
+	"github.com/JayTeeSF/ivy"
 	"os"
 )
 
@@ -116,6 +116,23 @@ func main() {
 	}
 
 	//
+	// CreateWithId
+	//
+	plane = Plane{FileId: "1070", Name: "Test", Speed: 111, Range: 111, EngineType: "radial", Tags: []string{"test"}}
+	id, err = db.CreateWithId("planes", plane.FileId, plane)
+	if err != nil {
+		fmt.Println("Create failed:", err)
+	}
+
+	err = db.Find("planes", &plane, id)
+	if err != nil {
+		fmt.Println("Find failed:", err)
+	}
+
+	fmt.Printf("\n======================= New Plane created with id '%v' ================================================================\n", id)
+	fmt.Printf("%#v\n", plane.Name)
+
+	//
 	// Create
 	//
 	plane = Plane{Name: "Test", Speed: 111, Range: 111, EngineType: "radial", Tags: []string{"test"}}
@@ -155,6 +172,10 @@ func main() {
 	// Delete
 	//
 	err = db.Delete("planes", id)
+	if err != nil {
+		fmt.Println("Delete failed:", err)
+	}
+	err = db.Delete("planes", "1070")
 	if err != nil {
 		fmt.Println("Delete failed:", err)
 	}

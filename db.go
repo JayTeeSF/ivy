@@ -29,7 +29,7 @@ type DB struct {
 	path          string
 	rwLocks       map[string]*sync.RWMutex
 	fieldsToIndex map[string][]string
-	tagIndexes    map[string]map[string][]string
+	tagIndexes    map[string]map[string][]string // I don't actually care about this
 	fldIndexes    map[string]map[string]map[string][]string
 }
 
@@ -47,7 +47,7 @@ func OpenDB(dbPath string, fieldsToIndex map[string][]string) (*DB, error) {
 
 	db.rwLocks = make(map[string]*sync.RWMutex)
 
-	db.tagIndexes = make(map[string]map[string][]string)
+	db.tagIndexes = make(map[string]map[string][]string) // I don't actually care about this
 	db.fldIndexes = make(map[string]map[string]map[string][]string)
 
 	files, _ := ioutil.ReadDir(db.path)
@@ -158,6 +158,7 @@ func (db *DB) FindAllIdsForField(tblName string, searchField string, searchValue
 	return ids, nil
 }
 
+/* I don't actually care about this */
 // FindAllIdsForTag returns all record ids that match the all of the supplied
 // search tags. It takes a table name, and a slice of tags to search for.
 // It returns a slice of record ids and any error encountered.
@@ -218,15 +219,7 @@ func (db *DB) FindAllIdsForTags(tblName string, searchTags []string) ([]string, 
 // Create creates a new record for the specified table.
 // It takes a table name, and a struct representing the record data.
 // It returns the id of the newly created record and any error encountered.
-func (db *DB) Create(tblName string, rec interface{}) (string, error) {
-	db.rwLocks[tblName].Lock()
-	defer db.rwLocks[tblName].Unlock()
-
-	fileId, err := db.nextAvailableFileId(tblName)
-	if err != nil {
-		return "", err
-	}
-
+func createWithId(db *DB, tblName string, fileId string, rec interface{}) (string, error) {
 	marshalledRec, err := json.Marshal(rec)
 
 	if err != nil {
@@ -246,6 +239,23 @@ func (db *DB) Create(tblName string, rec interface{}) (string, error) {
 	}
 
 	return fileId, nil
+}
+
+func (db *DB) Create(tblName string, rec interface{}) (string, error) {
+	db.rwLocks[tblName].Lock()
+	defer db.rwLocks[tblName].Unlock()
+
+	fileId, err := db.nextAvailableFileId(tblName)
+	if err != nil {
+		return "", err
+	}
+	return createWithId(db, tblName, fileId, rec)
+}
+
+func (db *DB) CreateWithId(tblName string, fileId string, rec interface{}) (string, error) {
+	db.rwLocks[tblName].Lock()
+	defer db.rwLocks[tblName].Unlock()
+	return createWithId(db, tblName, fileId, rec)
 }
 
 // Update updates a record for the specified table.
@@ -415,6 +425,7 @@ func (db *DB) initNonTagsIndexes(tblName string) error {
 	return nil
 }
 
+/* I don't actually care about this */
 // initTagsIndex initializes all tag indexes for a database.
 func (db *DB) initTagsIndex(tblName string) error {
 	var rec map[string]interface{}
@@ -474,6 +485,7 @@ func (db *DB) initTblIndexes(tblName string) error {
 			return err
 		}
 
+		/* I don't actually care about this */
 		if stringInSlice("tags", fldNames) {
 			db.initTagsIndex(tblName)
 			if err != nil {

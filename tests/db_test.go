@@ -2,7 +2,7 @@ package ivy
 
 import (
 	"fmt"
-	"github.com/jameycribbs/ivy"
+	"github.com/JayTeeSF/ivy"
 	"io/ioutil"
 	"os"
 	"testing"
@@ -112,6 +112,34 @@ func TestDelete(t *testing.T) {
 		}
 	} else {
 		t.Error("Expected Find error, got no error.")
+	}
+
+}
+
+func TestCreateWithId(t *testing.T) {
+	foo := Foo{FileId: "1010", Bar: "test", Tags: []string{"test"}}
+	id, err := db.CreateWithId("foos", foo.FileId, foo)
+	if err != nil {
+		t.Error("Find failed:", err)
+	}
+
+	foo = Foo{}
+
+	err = db.Find("foos", &foo, id)
+	if err != nil {
+		t.Error("Find failed:", err)
+	}
+
+	if foo.Bar != "test" {
+		t.Error("Expected 'test', got ", foo.Bar)
+	}
+
+	if foo.Tags[0] != "test" {
+		t.Error("Expected first tag to be 'test', got ", foo.Tags[0])
+	}
+	err = db.Delete("foos", "1010")
+	if err != nil {
+		t.Error("Delete failed:", err)
 	}
 
 }
